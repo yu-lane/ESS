@@ -12,6 +12,7 @@
  */
 
 #include "IMU.h"
+
 //#include "delay.h"
 extern union combine MPU9250D;
 extern union combine MPU_Static_Err;
@@ -131,6 +132,7 @@ void IMU_AHRSupdate(float gx, float gy, float gz, float ax, float ay, float az, 
 //  halfT =  ((float)(now - lastUpdate) / 2000000.0f);
 //  }
 //  lastUpdate = now;	//更新时间
+	halfT=0.005;
 
   norm = invSqrt(ax*ax + ay*ay + az*az);       
   ax = ax * norm;

@@ -346,23 +346,7 @@ void IMUupdate(float gx, float gy, float gz, float ax, float ay, float az)
 
 }
 */
-int Sample_Ris = 10;
-void ADC_Data_Process( unsigned short int *Raw_Data,float Ris_Data[4])
-{
-	float Vol_Data[4];
-/*	
-	Vol_Data[0] = Raw_Data[0]*33000/4095;//33000代表参考电压的0.1mv单位的值
-	Vol_Data[1] = Raw_Data[1]*33000/4095;//ADC采样值增长1，增长约0.8mv电压
-	Vol_Data[2] = Raw_Data[2]*33000/4095;//以33000时，数值增大约为8，以3300时，数值增大约0.8
-	Vol_Data[3] = Raw_Data[3]*33000/4095;//用哪个更好？
-*/	
-	Ris_Data[0] = (4095-Raw_Data[0])*Sample_Ris/Raw_Data[0];//(4095-ADCVAL)*Rsample/ADCVAL
-	Ris_Data[1] = (4095-Raw_Data[1])*Sample_Ris/Raw_Data[1];//得到电阻值
-	Ris_Data[2] = (4095-Raw_Data[2])*Sample_Ris/Raw_Data[2];//
-	Ris_Data[3] = (4095-Raw_Data[3])*Sample_Ris/Raw_Data[3];//
-	
 
-}
 
 
 

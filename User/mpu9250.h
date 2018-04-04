@@ -4,6 +4,18 @@
 #include "stm32f10x.h"
 #include "bsp_i2c.h"
 
+struct Axis_f{
+	float x;
+	float y;
+	float z;
+};
+
+struct Axis_Euler{
+	float Pitch;//??????-??
+	float Roll;//??????-??
+	float Yaw;//??
+};
+
 struct AXIS{
 	signed short int x;
 	signed short int y;

@@ -14,6 +14,10 @@
 */
 
 #include "ahrs.h"
+//#ifdef LAB7_AHRS
+extern union combine MPU9250D;
+extern union combine MPU_Static_Err;
+extern struct Axis_Euler Angle;
 
 volatile float exInt, eyInt, ezInt;  // 误差积分
 volatile float q0, q1, q2, q3,w1,w2,w3; // 全局四元数
@@ -67,14 +71,14 @@ float I[49]={1,0,0,0,0,0,0,
 *功　　能:	  初始化Tim2  Tim3 将两个定时器级联，以产生一个32位的定时器来提供系统us 级的计时	
 输入参数：无
 输出参数：没有	
-*******************************************************************************/
+******************************************************************************
 void Initial_Timer3(void)
 {
   TIM_TimeBaseInitTypeDef  TIM_TimeBaseStructure;
 
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2 | RCC_APB1Periph_TIM3, ENABLE); 
-	/* TIM2 configuration*/ 
-  /* Time Base configuration 基本配置 配置定时器的时基单元*/
+	// TIM2 configuration 
+  // Time Base configuration 基本配置 配置定时器的时基单元
   TIM_TimeBaseStructInit(&TIM_TimeBaseStructure); 
   TIM_TimeBaseStructure.TIM_Period = 0xffff; //自动重装值         
   TIM_TimeBaseStructure.TIM_Prescaler = 0x0;       
@@ -83,22 +87,21 @@ void Initial_Timer3(void)
   TIM_TimeBaseInit(TIM2, &TIM_TimeBaseStructure); 
   
   TIM_PrescalerConfig(TIM2, 0, TIM_PSCReloadMode_Update);
-  /* Disable the TIM2 Update event */
+//   Disable the TIM2 Update event 
   TIM_UpdateDisableConfig(TIM2, ENABLE);
-  /* ----------------------TIM2 Configuration as slave for the TIM3 ----------*/
-  /* Select the TIM2 Input Trigger: TIM3 TRGO used as Input Trigger for TIM2*/
+  //----------------------TIM2 Configuration as slave for the TIM3 ----------//
+  // Select the TIM2 Input Trigger: TIM3 TRGO used as Input Trigger for TIM2//
   TIM_SelectInputTrigger(TIM2, TIM_TS_ITR2);
-  /* Use the External Clock as TIM2 Slave Mode */
+  // Use the External Clock as TIM2 Slave Mode //
   TIM_SelectSlaveMode(TIM2, TIM_SlaveMode_External1);
-  /* Enable the TIM2 Master Slave Mode */
+  //Enable the TIM2 Master Slave Mode //
   TIM_SelectMasterSlaveMode(TIM2, TIM_MasterSlaveMode_Enable);
   TIM_ARRPreloadConfig(TIM2, ENABLE);	
-	/* 定时器配置:
-	1.设置定时器最大计数值 50000
-	2.设置时钟分频系数：TIM_CKD_DIV1
-	3. 设置预分频：  1Mhz/50000= 1hz 
-	4.定时器计数模式  向上计数模式
-	*/		 
+	// 定时器配置:
+//	1.设置定时器最大计数值 50000
+//	2.设置时钟分频系数：TIM_CKD_DIV1
+//	3. 设置预分频：  1Mhz/50000= 1hz 
+//	4.定时器计数模式  向上计数模式	 
   	TIM_TimeBaseStructure.TIM_Period = 0xffff;     
   	TIM_TimeBaseStructure.TIM_Prescaler = 72;	 //1M 的时钟  
   	TIM_TimeBaseStructure.TIM_ClockDivision = TIM_CKD_DIV1;	
@@ -110,16 +113,16 @@ void Initial_Timer3(void)
 
 	TIM_SelectSlaveMode(TIM3, TIM_SlaveMode_Reset);
 	TIM_UpdateRequestConfig(TIM3, TIM_UpdateSource_Regular);
-	/* ----------------------TIM3 Configuration as Master for the TIM2 -----------*/
-  	/* Use the TIM3 Update event  as TIM3 Trigger Output(TRGO) */
+	//----------------------TIM3 Configuration as Master for the TIM2 -----------//
+  	// Use the TIM3 Update event  as TIM3 Trigger Output(TRGO) //
   	TIM_SelectOutputTrigger(TIM3, TIM_TRGOSource_Update);
-  	/* Enable the TIM3 Master Slave Mode */
+  	// Enable the TIM3 Master Slave Mode //
   	TIM_SelectMasterSlaveMode(TIM3, TIM_MasterSlaveMode_Enable);
 
   	//启动定时器
 	TIM_Cmd(TIM3, ENABLE); 
   	TIM_Cmd(TIM2, ENABLE);                  
-}
+}*/
 
 // Fast inverse square-root
 /**************************实现函数********************************************
@@ -143,7 +146,7 @@ float invSqrt(float x) {
 *功　　能:	  读取系统运行的时间 ，返回单位为us 的时间数。	
 输入参数：无
 输出参数：处理器当前时间，从上电开始计时  单位 us
-*******************************************************************************/
+******************************************************************************
 uint32_t micros(void)
 {
  	uint32_t temp=0 ;
@@ -151,7 +154,7 @@ uint32_t micros(void)
  	temp = temp<<16;
  	temp += TIM3->CNT; //读低16位时间
  	return temp;
-}
+}*/
 
 /**************************实现函数********************************************
 *函数原型:	   void AHRS_init(void)
@@ -165,21 +168,21 @@ uint32_t micros(void)
 *******************************************************************************/
 void AHRS_init(void)
 {
-	Initial_Timer3();
-	MPU6050_initialize();
-	HMC5883L_SetUp();
-	delay_ms(50);
-	MPU6050_initialize();
-	HMC5883L_SetUp();
-	BMP180_init();
+//	Initial_Timer3();
+//	MPU6050_initialize();
+//	HMC5883L_SetUp();
+//	delay_ms(50);
+//	MPU6050_initialize();
+//	HMC5883L_SetUp();
+//	BMP180_init();
 
   	//陀螺仪偏差
 	w1=0;//0.095f;
 	w2=0;//0.078f;
 	w3=0;//-0.014f;
 	
-  	lastUpdate = micros();//更新时间
-  	now = micros();
+//  	lastUpdate = micros();//更新时间
+//  	now = micros();
 
     q0=1.0;
     q1=0;
@@ -195,20 +198,20 @@ void AHRS_init(void)
 *******************************************************************************/
 
 void IMU_getValues(float * values) {  
-	int16_t accgyroval[6];
-	int i;
-	//读取加速度和陀螺仪的当前ADC
-    MPU6050_getMotion6(&accgyroval[0], &accgyroval[1], &accgyroval[2], &accgyroval[3], &accgyroval[4], &accgyroval[5]);
-    for(i = 0; i<6; i++) {
-      if(i < 3) {
-        values[i] = (float) accgyroval[i];
-      }
-      else {
-        values[i] = ((float) accgyroval[i]) / 32.8f; //转成度每秒
-		//这里已经将量程改成了 1000度每秒  32.8 对应 1度每秒
-      }
-    }
-    HMC58X3_mgetValues(&values[6]);	//读取磁力计的ADC值
+
+		//读取加速度和陀螺仪的当前ADC
+	MPU9250_Get_Data(&MPU9250D);
+//    MPU6050_getMotion6(&accgyroval[0], &accgyroval[1], &accgyroval[2], &accgyroval[3], &accgyroval[4], &accgyroval[5]);
+  values[0] = (float) MPU9250D.DataINT.ACC.x;
+	values[1] = (float) MPU9250D.DataINT.ACC.y;
+	values[2] = (float) MPU9250D.DataINT.ACC.z;
+	values[3] = (float) (MPU9250D.DataINT.GYRO.x-MPU_Static_Err.DataINT.GYRO.x)/16.40;
+	values[4] = (float) (MPU9250D.DataINT.GYRO.y-MPU_Static_Err.DataINT.GYRO.y)/16.40;
+	values[5] = (float) (MPU9250D.DataINT.GYRO.z-MPU_Static_Err.DataINT.GYRO.z)/16.40;
+	values[6] = (float) MPU9250D.DataINT.MAG.x;
+	values[7] = (float) MPU9250D.DataINT.MAG.y;
+	values[8] = (float) MPU9250D.DataINT.MAG.z;
+
 }
 
 
@@ -228,7 +231,7 @@ void AHRS_AHRSupdate(float gx, float gy, float gz, float ax, float ay, float az,
   float g=9.79973;
   float Ha1,Ha2,Ha3,Ha4,Hb1,Hb2,Hb3,Hb4;
   float e1,e2,e3,e4,e5,e6;
-  float halfT;
+  float halfT=0.05;
 
 
 // 先把这些用得到的值算好
@@ -245,14 +248,14 @@ void AHRS_AHRSupdate(float gx, float gy, float gz, float ax, float ay, float az,
   //石家庄地区磁场 
   bx = 0.5500;
   bz = 0.8351; 
-  now = micros();  //读取时间
-  if(now<lastUpdate){ //定时器溢出过了。
-  halfT =  ((float)(now + (0xffff- lastUpdate)) / 2000000.0f);
-  }
-  else	{
-  halfT =  ((float)(now - lastUpdate) / 2000000.0f);
-  }
-  lastUpdate = now;	//更新时间
+//  now = micros();  //读取时间
+//  if(now<lastUpdate){ //定时器溢出过了。
+//  halfT =  ((float)(now + (0xffff- lastUpdate)) / 2000000.0f);
+//  }
+//  else	{
+//  halfT =  ((float)(now - lastUpdate) / 2000000.0f);
+//  }
+//  lastUpdate = now;	//更新时间
    norm = invSqrt(ax*ax + ay*ay + az*az);       
   ax = ax * norm*g;
   ay = ay * norm*g;
@@ -382,15 +385,15 @@ void AHRS_getQ(float * q) {
 输入参数： 将要存放姿态角的数组首地址
 输出参数：没有
 *******************************************************************************/
-void AHRS_getYawPitchRoll(float * angles) {
+void AHRS_getYawPitchRoll(void) {
   float q[4]; //　四元数
   
   AHRS_getQ(q); //更新全局四元数
-  angles[0] = -atan2(2 * q[1] * q[2] + 2 * q[0] * q[3], -2 * q[2]*q[2] - 2 * q[3] * q[3] + 1)* 180/M_PI; // yaw 
-  angles[1] = -asin(-2 * q[1] * q[3] + 2 * q[0] * q[2])* 180/M_PI; // pitch
-  angles[2] = atan2(2 * q[2] * q[3] + 2 * q[0] * q[1], -2 * q[1] * q[1] - 2 * q[2] * q[2] + 1)* 180/M_PI; // roll
-  if(angles[0]<0)angles[0]+=360.0f;  //将 -+180度  转成0-360度
+	Angle.Yaw = -atan2(2 * q[1] * q[2] + 2 * q[0] * q[3], -2 * q[2]*q[2] - 2 * q[3] * q[3] + 1)* 180/M_PI; // yaw
+  Angle.Pitch = -asin(-2 * q[1] * q[3] + 2 * q[0] * q[2])* 180/M_PI; // pitch
+  Angle.Roll = atan2(2 * q[2] * q[3] + 2 * q[0] * q[1], -2 * q[1] * q[1] - 2 * q[2] * q[2] + 1)* 180/M_PI; // roll
+  //if(angles[0]<0)angles[0]+=360.0f;  //将 -+180度  转成0-360度
 }
- 
+// #endif
 
 //------------------End of File----------------------------

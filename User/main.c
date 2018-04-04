@@ -11,9 +11,10 @@
   */ 
 #include "include.h"
 
+//#define LAB7_AHRS
 void MPU9250IMU(void);
 void SendDataProcess(void);
-
+void ADC_Data_Process( unsigned short int *Raw_Data,float Ris_Data[4]);
 
 unsigned int systime=0;
 unsigned int preview_time=0;
@@ -48,7 +49,9 @@ int main(void)
 	
 	MPU9250_GPIO_Config();//与MPU9250相关的IO初始化
 	MPU9250_Init();//MPU9250的设置
+
 	IMU_init();
+
 	ADCx_Init();//ADC初始化，DMA传输
 	
 //	zlg_config();
@@ -64,17 +67,21 @@ int main(void)
 
 	while(1)
 	{
-		if(systime-preview_time>=10)
-		{
-			preview_time=systime;
-			//MPU9250IMU();
+//		if(systime-preview_time>=10)
+//		{
+//			preview_time=systime;
+			
 			IMU_getYawPitchRoll();
+//			printf("IMU: X:%.2f\tY:%.2f\t",	Angle.Pitch,   Angle.Roll);
+			MPU9250IMU();
+//			printf("Angle: X:%.2f\tY:%.2f\tX:%.2f\tY:%.2f\r\n",	Angle.Pitch,   Angle.Roll,  Angle_m.Pitch, Angle_m.Roll 	);
+
 			ADC_Data_Process( ADC_ConvertedValue,Resistance);
 			SendDataProcess();
-			printf("Angle: X:%.2f\tY:%.2f\tZ:%.2f\r\n",	Angle.Pitch,   Angle.Roll,   Angle.Yaw	);
+//			printf("Angle: X:%.2f\tY:%.2f\tZ:%.2f\r\n",	Angle.Pitch,   Angle.Roll,   Angle.Yaw	);
 			LED3_TOGGLE;
 			//LED_Delay(0xffff);
-		}
+//		}
 
 	}
 }
@@ -173,13 +180,13 @@ void USART1_IRQHandler(void)
 
 void MPU9250IMU()
 {
-	MPU9250_Get_Data(&MPU9250D);
+//	MPU9250_Get_Data(&MPU9250D);
 	Angle_m.Roll=atan2(MPU9250D.DataINT.ACC.y,MPU9250D.DataINT.ACC.z)*57.2957795;//转换为角度单位度
 	Angle_m.Pitch=atan2(MPU9250D.DataINT.ACC.x,MPU9250D.DataINT.ACC.z)*57.2957795;
 	Angle_m.Yaw=0;  //atan2(MPU9250D.DataINT.MAG.x,MPU9250D.DataINT.MAG.y)*57.2957795;//使用待定
 	
 	Gyro_m.Roll=(MPU9250D.DataINT.GYRO.x-MPU_Static_Err.DataINT.GYRO.x)/16.40;   //转换为角速度单位度每秒
-	Gyro_m.Pitch=-(MPU9250D.DataINT.GYRO.x-MPU_Static_Err.DataINT.GYRO.x)/16.40;
+	Gyro_m.Pitch=-(MPU9250D.DataINT.GYRO.y-MPU_Static_Err.DataINT.GYRO.y)/16.40;
 	Gyro_m.Yaw=-(MPU9250D.DataINT.GYRO.z-MPU_Static_Err.DataINT.GYRO.z)/16.40;
 	
 	Angle.Roll = Kalman_Filter(Angle_m.Roll,Gyro_m.Roll);
@@ -213,5 +220,21 @@ void SendDataProcess()
 	
 }
 
+int Sample_Ris = 10;
+void ADC_Data_Process( unsigned short int *Raw_Data,float Ris_Data[4])
+{
+/*	float Vol_Data[4];
+	
+	Vol_Data[0] = Raw_Data[0]*33000/4095;//33000???????0.1mv????
+	Vol_Data[1] = Raw_Data[1]*33000/4095;//ADC?????1,???0.8mv??
+	Vol_Data[2] = Raw_Data[2]*33000/4095;//?33000?,??????8,?3300?,?????0.8
+	Vol_Data[3] = Raw_Data[3]*33000/4095;//??????
+*/	
+	Ris_Data[0] = (4095-Raw_Data[0])*Sample_Ris/Raw_Data[0];//(4095-ADCVAL)*Rsample/ADCVAL
+	Ris_Data[1] = (4095-Raw_Data[1])*Sample_Ris/Raw_Data[1];//?????
+	Ris_Data[2] = (4095-Raw_Data[2])*Sample_Ris/Raw_Data[2];//
+	Ris_Data[3] = (4095-Raw_Data[3])*Sample_Ris/Raw_Data[3];//
+	
 
+}
 
