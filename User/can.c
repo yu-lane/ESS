@@ -1,8 +1,6 @@
 #include "can.h" 
-#include "include.h" 
+
 extern int can_addr;
-extern CanTxMsg TxMessage;
-extern CanTxMsg RxMessage;
 /*
  * 函数名：CAN_GPIO_Config
  * 描述  ：CAN的GPIO 配置,PB8上拉输入，PB9推挽输出
@@ -76,10 +74,11 @@ static void CAN_Mode_Config(void)
     CAN_InitStructure.CAN_RFLM=DISABLE;			   //MCR-RFLM  接收FIFO 锁定模式  DISABLE-溢出时新报文会覆盖原有报文  
     CAN_InitStructure.CAN_TXFP=DISABLE;			   //MCR-TXFP  发送FIFO优先级 DISABLE-优先级取决于报文标示符 
     CAN_InitStructure.CAN_Mode = CAN_Mode_Normal;  //正常发送模式
-    CAN_InitStructure.CAN_SJW=CAN_SJW_1tq;		   //BTR-SJW 重新同步跳跃宽度 2个时间单元
+    CAN_InitStructure.CAN_SJW=CAN_SJW_1tq;		   //BTR-SJW 重新同步跳跃宽度 1个时间单元，定义了每一位可调整的时间单元
+	//同步段(SYNC_SEG)，固定为一个时间单位
     CAN_InitStructure.CAN_BS1=CAN_BS1_6tq;		   //BTR-TS1 时间段1 占用了6个时间单元
-    CAN_InitStructure.CAN_BS2=CAN_BS2_2tq;		   //BTR-TS1 时间段2 占用了3个时间单元
-    CAN_InitStructure.CAN_Prescaler =4;		   ////BTR-BRP 波特率分频器  定义了时间单元的时间长度 36/(1+6+3)/4=0.8Mbps
+    CAN_InitStructure.CAN_BS2=CAN_BS2_2tq;		   //BTR-TS1 时间段2 占用了2个时间单元
+    CAN_InitStructure.CAN_Prescaler =4;		   ////BTR-BRP 波特率分频器  定义了时间单元的时间长度 36/(1+6+2)/4=1Mbps
 	CAN_Init(CAN1, &CAN_InitStructure);
 }
 
@@ -137,12 +136,13 @@ void CAN_Config(void)
  * 调用  ：外部调用
  */	 
 void CAN_Send_Std_Msg(int can_addr,unsigned char *data,char datanum)
-{	  
+{	
+	CanTxMsg TxMessage;
 	unsigned char ii=0;
-  TxMessage.StdId=can_addr-0x100;	
+  TxMessage.StdId=can_addr;
 	//TxMessage.ExtId=0x1314;
-	TxMessage.DLC=datanum;							 //数据长度为2字节
-	TxMessage.IDE=CAN_ID_STD;					 //扩展模式
+	TxMessage.DLC=datanum;							 //数据长度
+	TxMessage.IDE=CAN_ID_STD;					 //模式
   TxMessage.RTR=CAN_RTR_DATA;				 //发送的是数据
 	for(ii=0;ii<datanum;ii++)
 	{

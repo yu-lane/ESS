@@ -103,11 +103,11 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
   if((RxMessage.StdId==can_addr) && (RxMessage.IDE==CAN_ID_STD) )
   {//发送姿态信息
 		//	设置要通过CAN发送的信息	
-			CAN_Send_Std_Msg(can_addr,sendBufAtt,6);
+			CAN_Send_Std_Msg(can_addr-0x100,sendBufAtt,6);
   }
 	else if((RxMessage.StdId==can_addr+0x010) && (RxMessage.IDE==CAN_ID_STD) )
 	{//发送ADC读取的值
-		CAN_Send_Std_Msg(can_addr+0x010,sendBufVol,8);
+		CAN_Send_Std_Msg(can_addr+0x010-0x100,sendBufVol,8);
 	}
 	else if((RxMessage.StdId==can_addr+0x020) && (RxMessage.IDE==CAN_ID_STD) )
 	{
@@ -194,7 +194,50 @@ void MPU9250IMU()
 	Angle.Yaw=atan2(MPU9250D.DataINT.MAG.x,MPU9250D.DataINT.MAG.y)*57.2957795;
 	
 }
+/****************************************************************
+*
+*
+***************************************************************
+float Roll_err=0,Pitch_err=0,gyro_err=0;//??????????
+float Roll, Pitch;
+float Roll_pre,Pitch_pre, gyro_x_pre,gyro_y_pre;
+void Kalman_IMU(int accx,int accy,int accz,float gyro_x,float gyro_y)
+{
+	
 
+	Roll=atan2(accy,accz)*57.2957795;//????????
+	Pitch=atan2(accx,accz)*57.2957795;
+	gyroGx=(gyro_x-gyro_static_err_x)/16.40;         //???????????
+	gyroGy=-(gyro_y-gyro_static_err_y)/16.40;
+	
+	if(((Roll-Roll_pre>Roll_err)||(Roll_pre-Roll>Roll_err))\
+		&&((gyroGx>gyro_err)||(gyroGx<-gyro_err)))
+	{
+		Roll_pre  = Roll;
+		Kalman_Filter(Roll,gyroGx);
+	}
+	else
+	{
+		Kalman_Filter(Roll_pre,gyroGx);
+	}
+	
+	if(((Pitch-Pitch_pre>Pitch_err)||(Pitch_pre-Pitch>Pitch_err))\
+		&&((gyroGy>gyro_err)||(gyroGy<-gyro_err)))
+	{
+		Pitch_pre = Pitch;
+		Kalman_Filter1(Pitch,gyroGy);
+	}
+	else
+	{
+		Kalman_Filter1(Pitch_pre,gyroGy);
+	}
+
+}*/
+/******************************************************************************
+  * @brief  This function use in dataprocess
+  * @param  None
+  * @retval None
+  ****************************************************************************/
 void SendDataProcess()
 {
 	//经过计算后的最终姿态
@@ -219,7 +262,11 @@ void SendDataProcess()
 //	ADC_Data_Process(ADC_ConvertedValue,sendBufVol);
 	
 }
-
+/******************************************************************************
+  * @brief  This function use in ADC value transmit to resistance
+  * @param  None
+  * @retval None
+  ****************************************************************************/
 int Sample_Ris = 10;
 void ADC_Data_Process( unsigned short int *Raw_Data,float Ris_Data[4])
 {

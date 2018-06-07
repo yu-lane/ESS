@@ -145,34 +145,6 @@ void SysTick_Handler(void)
 /*  file (startup_stm32f10x_xx.s).                                            */
 /******************************************************************************/
 
-
-/*
-char Usart_flag,GET_COUNT;
-u8 Usart_get_count=0;
-void USART1_IRQHandler(void)
-{
-	uint8_t ch;
-	
-	if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
-	{ 	
-	    //ch = USART1->DR;
-			ch = USART_ReceiveData(USART1);
-		if(Usart_get_count==1)
-		{
-			Usart_get_count=0;
-			GET_COUNT=ch;
-		}
-		if(ch=='S')
-		{
-			Usart_flag='S';
-			Usart_get_count=1;
-		}
-		else
-		{
-			Usart_flag=ch;
-		}	} 
-	 
-}*/
 /**
   * @brief  This function handles PPP interrupt request.
   * @param  None

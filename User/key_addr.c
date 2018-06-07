@@ -41,7 +41,7 @@ int Get_Key_Addr(void)
 
 void Addr_Process(unsigned int addr,unsigned int *CAN_ID,unsigned int wireless_setting[2])
 {
-	*CAN_ID = (addr & 0x000f)+0x710;
+	*CAN_ID = (addr & 0x000f)+0x700;
 	wireless_setting[0] = (addr&0x0030)>>4;
 	wireless_setting[1] = (addr & 0x000f);
 	
