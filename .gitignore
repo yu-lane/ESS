@@ -1,0 +1,9 @@
+$ cat .gitignore
+*.o
+*.a
+*.pdf
+*.docx
+*.xlsx
+*.bat
+*.lnk
+Project/
